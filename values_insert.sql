@@ -244,3 +244,55 @@ ELSE
     ROLLBACK;
 END IF;
 
+-- Créer des Index
+-- Implémenter au moins 3 index stratégiques pour améliorer les 
+-- requêtes lentes.
+CREATE INDEX idx_customers_email ON customers(email);
+SELECT * FROM customers WHERE email = 'claire.martin@email.com';
+
+CREATE INDEX idx_customers_phone_number ON customers(phone_number);
+SELECT * FROM customers WHERE phone_number = '0678451236';
+
+CREATE INDEX idx_account_last_name ON customers(last_name);
+SELECT * FROM customers WHERE last_name = 'Martin';
+
+
+-- EXPLAIN ANALYZE
+-- Utiliser cet outil pour analyser le plan d'exécution des requêtes 
+-- avant et après indexation
+
+EXPLAIN SELECT * 
+FROM customers 
+WHERE email = 'claire.martin@email.com';
+
+EXPLAIN
+SELECT * 
+FROM customers 
+WHERE phone_number = '0678451236';
+
+EXPLAIN
+SELECT * 
+FROM customers 
+WHERE last_name = 'Martin';
+
+-- Comparer les Performances
+-- Démontrer l'impact des index sur la rapidité d'exécution des 
+-- requêtes
+
+-- Nous n'avons pas assez de donner pour comparer les differences avant et après l'index mais l'index permet d'accéder plus rapidement au données en pointant directement sur la ligne demandé.
+-- Sans index, pour trouver une donnée, la base de données doit scanner toutes les lignes (full table scan).
+
+-- Justifier les Choix
+-- Expliquer pourquoi chaque index a été créé et sur quelles 
+-- colonnes.
+
+CREATE INDEX idx_customers_email ON customers(email);
+SELECT * FROM customers WHERE email = 'claire.martin@email.com';
+
+CREATE INDEX idx_customers_phone_number ON customers(phone_number);
+SELECT * FROM customers WHERE phone_number = '0678451236';
+
+CREATE INDEX idx_account_last_name ON customers(last_name);
+SELECT * FROM customers WHERE last_name = 'Martin';
+
+-- Car lors de la recherche d’un client, l’adresse e-mail, le numéro de téléphone ou le nom sont souvent demandés afin de pouvoir retrouver un compte.
