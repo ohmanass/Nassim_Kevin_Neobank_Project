@@ -198,3 +198,18 @@ customer_monthly_volume AS (
 SELECT *
 FROM customer_monthly_volume
 ORDER BY monthly_volume DESC;
+
+START TRANSACTION;
+UPDATE accounts
+SET balance = balance - 100
+WHERE account_id = 3
+
+-- Procedure de virements
+IF ROW_COUNT() > 0 THEN;
+   UPDATE accounts
+    SET balance = balance + 100
+    WHERE account_id = 4;
+COMMIT;
+ELSE
+    ROLLBACK;
+END IF;
