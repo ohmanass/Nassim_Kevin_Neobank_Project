@@ -137,3 +137,64 @@ VALUES
 ('192.168.1.10', 'Chrome - Windows', 1),
 ('192.168.1.15', 'Safari - iPhone', 2),
 ('192.168.1.20', 'Firefox - Linux', 5);
+
+-- ---------------- Etape 3 ----------------
+-- Top 10 Clients Par volume total de transactions
+SELECT 
+    c.customer_id,
+    c.last_name,
+    c.name,
+    COUNT(t.transaction_id) AS total_transactions,
+    SUM(t.amount) AS total_volume
+    FROM customers c
+    JOIN accounts a 
+        ON c.customer_id = a.customer_id
+    JOIN transactions t 
+        ON t.source_account_id = a.account_id
+    WHERE t.status = 'successful'
+    GROUP BY c.customer_id, c.last_name, c.name
+    ORDER BY total_transactions DESC
+    LIMIT 10;
+
+-- Analyse mensuelle des volumes et fréquences de dépôts.
+WITH deposit_transactions AS (
+    SELECT
+        t.source_account_id,
+        t.amount,
+        t.transaction_date
+    FROM transactions t
+    JOIN transaction_types tt
+        ON t.transaction_type_id = tt.transaction_type_id
+    WHERE tt.wording = 'deposit'
+      AND MONTH(t.transaction_date) = MONTH(CURRENT_DATE)
+),
+
+customer_accounts AS (
+    SELECT
+        c.customer_id,
+        c.last_name,
+        c.name,
+        a.account_id
+    FROM customers c
+    JOIN accounts a
+        ON c.customer_id = a.customer_id
+),
+
+customer_monthly_volume AS (
+    SELECT
+        ca.customer_id,
+        ca.last_name,
+        ca.name,
+        SUM(dt.amount) AS monthly_volume
+    FROM customer_accounts ca
+    JOIN deposit_transactions dt
+        ON dt.source_account_id = ca.account_id
+    GROUP BY
+        ca.customer_id,
+        ca.last_name,
+        ca.name
+)
+
+SELECT *
+FROM customer_monthly_volume
+ORDER BY monthly_volume DESC;
