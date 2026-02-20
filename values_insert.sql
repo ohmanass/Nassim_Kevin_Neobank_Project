@@ -199,6 +199,36 @@ SELECT *
 FROM customer_monthly_volume
 ORDER BY monthly_volume DESC;
 
+-- Mises en place des 3 regles de securite du compte 
+SELECT 
+    t.transaction_id, 
+    t.amount, 
+    tl.daily_limit
+FROM transactions t
+JOIN transaction_limits tl 
+    ON t.source_account_id = tl.account_id
+WHERE t.amount > tl.daily_limit
+AND t.status = 'successful';
+
+SELECT 
+    source_account_id, 
+    COUNT(*) nb_tx
+FROM transactions
+WHERE transaction_date >= NOW() - INTERVAL 10 MINUTE
+GROUP BY source_account_id
+HAVING COUNT(*) >= 5;
+
+SELECT 
+    t.transaction_id, 
+    t.amount, 
+    cc.payment_ceiling
+FROM transactions t
+JOIN credit_card_payment ccp 
+    ON ccp.transaction_id = t.transaction_id
+JOIN credit_cards cc 
+    ON cc.card_id = ccp.credit_card_id
+WHERE t.amount > cc.payment_ceiling;
+
 START TRANSACTION;
 UPDATE accounts
 SET balance = balance - 100
@@ -213,3 +243,4 @@ COMMIT;
 ELSE
     ROLLBACK;
 END IF;
+
